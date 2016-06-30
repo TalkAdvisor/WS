@@ -8,6 +8,7 @@ use Session;
 
 use Illuminate\Http\Request;
 use App\Model\Speaker;
+use App\Model\Review;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SpeakerFormRequest;
 
@@ -23,7 +24,15 @@ class SpeakerController extends Controller
     public function getSpeaker($id)
     {
         $speaker = Speaker::findOrFail($id);
-        return $this->response->array(['speakers' => $speaker->toArray()]);
+        return $this->response->array(['speaker' => $speaker->toArray()]);
+    }
+
+    public function getReview($id)
+    {
+        $speaker = Speaker::findOrFail($id);
+        $review = Review::where('speaker_id', '=', $speaker->id)->firstOrFail();
+        $review_rating = $review->review_options()->get();
+        return $this->response->array(['speaker' => $speaker->toArray(), 'review' => $review->toArray(), '$review_rating' => $review_rating->toArray()]);
     }
 
     public function store(Request $request)

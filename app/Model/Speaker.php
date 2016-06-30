@@ -16,4 +16,9 @@ class Speaker extends Model
     {
         return $this->belongsToMany('App\Model\Talk')->withTimestamps();
     }
+
+    public function reviews()
+    {
+        return $this->hasMany('App\Model\Review');
+    }
 }

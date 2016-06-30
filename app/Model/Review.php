@@ -16,4 +16,9 @@ class Review extends Model
     {
         return $this->belongsTo('App\Model\Talk');
     }
+
+    public function speaker()
+    {
+        return $this->belongsTo('App\Model\Speaker');
+    }
 }
