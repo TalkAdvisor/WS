@@ -30,9 +30,15 @@ class SpeakerController extends Controller
     public function getReview($id)
     {
         $speaker = Speaker::findOrFail($id);
-        $review = Review::where('speaker_id', '=', $speaker->id)->firstOrFail();
-        $review_rating = $review->review_options()->get();
-        return $this->response->array(['speaker' => $speaker->toArray(), 'review' => $review->toArray(), '$review_rating' => $review_rating->toArray()]);
+        $reviews = Review::where('speaker_id', '=', $speaker->id)->get();
+        $review_with_rating = array();
+        $review_data = array();
+        foreach($reviews as $review){
+          $review_with_rating['review'] = $review;
+          $review_with_rating['review_rating'] = $review->review_options()->get();
+          $review_data[] = $review_with_rating;
+        }
+        return $this->response->array(['speaker' => $speaker->toArray(), 'reviews' => $review_data]);
     }
 
     public function store(Request $request)
