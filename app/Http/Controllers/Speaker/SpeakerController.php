@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Speaker;
 
 use View;
 use Session;
-
+use Storage;
+use File;
 use Illuminate\Http\Request;
 use App\Model\Speaker;
 use App\Model\Review;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SpeakerFormRequest;
+use Illuminate\Contracts\Filesystem\Filesystem;
+
 
 class SpeakerController extends Controller
 {
@@ -18,7 +21,6 @@ class SpeakerController extends Controller
     {
         $speakers = Speaker::all();
         return $this->response->array(['speakers' => $speakers->toArray()]);
-
     }
 
     public function getSpeaker($id)
@@ -52,6 +54,7 @@ class SpeakerController extends Controller
 	        $speaker->speaker_language = $request->input('speaker_language');
 	        $speaker->speaker_description = $request->input('speaker_description');
 	        $speaker->speaker_email = $request->input('speaker_email');
+          $speaker->video = $request->input('speaker_video');
 	        $file = $request->file('image');
 	        if($file != null){
 	            $image_name = time()."-".$file->getClientOriginalName();
@@ -71,6 +74,7 @@ class SpeakerController extends Controller
     public function update(Request $request, $id)
     {
         try{
+          $s3 = Storage::disk('s3');
           $speaker = Speaker::find($id);
           $speaker->speaker_name = $request->input('speaker_name');
           $speaker->speaker_englishname = $request->input('speaker_englishname');
@@ -79,12 +83,18 @@ class SpeakerController extends Controller
           $speaker->speaker_language = $request->input('speaker_language');
           $speaker->speaker_description = $request->input('speaker_description');
           $speaker->speaker_email = $request->input('speaker_email');
+          $speaker->video = $request->input('speaker_video');
           $file = $request->file('image');
           if($file != null){
+              //upload image to server and s3
               $image_name = time()."-".$file->getClientOriginalName();
               $file->move('uploads/speakers/', $image_name);
-              $speaker->speaker_photo = $image_name;
               $speaker->local_path = 'uploads/speakers/'.$image_name;
+              $s3->put('speakers/'.$image_name, file_get_contents($speaker->local_path));
+              //delete old image
+              $s3->delete('speakers/'.$speaker->speaker_photo);
+              File::delete('uploads/speakers/'.$speaker->speaker_photo);
+              $speaker->speaker_photo = $image_name;
           }
           $speaker->save();
           return $this->response->array($speaker->toArray());
