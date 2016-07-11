@@ -41,8 +41,9 @@ class ReviewController extends Controller
 	        $review_ratings = ReviewOption::all();
 	        $score = $request->input('score');
 	        if(count($score)<5) return $this->response->error('Score count is less than 5', 500);
-	        $review->user_name = $request->input('user_name');
-	        $review->user_email = $request->input('user_email');
+          $review->user_id = $request->input('user_id');
+	        //$review->user_name = $request->input('user_name');
+	        //$review->user_email = $request->input('user_email');
 	        $review->comment = $request->input('comment');
 	        $review->speaker_id = $request->input('speaker_id');
 	        $review->talk_id = '1';
