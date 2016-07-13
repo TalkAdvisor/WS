@@ -23,6 +23,12 @@ class SpeakerController extends Controller
         return $this->response->array(['speakers' => $speakers->toArray()]);
     }
 
+    public function getMaxRating($count)
+    {
+        $speakers = Speaker::orderBy('number_reviews', 'desc')->take($count)->get();
+        return $this->response->array(['speakers' => $speakers->toArray()]);
+    }
+
     public function getSpeaker($id)
     {
         $speaker = Speaker::findOrFail($id);
@@ -43,6 +49,30 @@ class SpeakerController extends Controller
         return $this->response->array(['speaker' => $speaker->toArray(), 'reviews' => $review_data]);
     }
 
+    public function getLastReview($id, $count)
+    {
+        $speaker = Speaker::findOrFail($id);
+        $reviews = Review::where('speaker_id', '=', $speaker->id)->orderBy('id', 'desc')->take($count)->get();
+        $review_with_rating = array();
+        $review_data = array();
+        foreach($reviews as $review){
+          $review_with_rating['review'] = $review;
+          $review_with_rating['review_rating'] = $review->review_options()->get();
+          $review_data[] = $review_with_rating;
+        }
+        return $this->response->array(['speaker' => $speaker->toArray(), 'reviews' => $review_data]);
+    }
+
+    public function getQuote($id, $count)
+    {
+        $speaker = Speaker::findOrFail($id);
+        $reviews = Review::where('speaker_id', '=', $speaker->id)->orderByRaw('RAND()')->take($count)->get();
+        foreach($reviews as $review){
+          $quote[] = $review->quote;
+        }
+        return $this->response->array(['speaker' => $speaker->toArray(), 'quotes' => $quote]);
+    }
+
     public function store(Request $request)
     {
         try{
@@ -51,8 +81,21 @@ class SpeakerController extends Controller
 	        $speaker->speaker_englishname = $request->input('speaker_englishname');
 	        $speaker->speaker_company = $request->input('speaker_company');
 	        $speaker->speaker_title = $request->input('speaker_title');
-	        $speaker->speaker_language = $request->input('speaker_language');
 	        $speaker->speaker_description = $request->input('speaker_description');
+          $speaker->average_1 = $request->input('average_1');
+          $speaker->average_2 = $request->input('average_2');
+          $speaker->average_3 = $request->input('average_3');
+          $speaker->average_4 = $request->input('average_4');
+          $speaker->average_5 = $request->input('average_5');
+          $average_array = [
+            $request->input('average_1'),
+            $request->input('average_2'),
+            $request->input('average_3'),
+            $request->input('average_4'),
+            $request->input('average_5'),
+          ];
+          $average = array_sum($average_array) / count($average_array);
+          $speaker->number_reviews = $average;
 	        $speaker->speaker_email = $request->input('speaker_email');
           $speaker->video = $request->input('speaker_video');
 	        $file = $request->file('image');
@@ -80,7 +123,20 @@ class SpeakerController extends Controller
           $speaker->speaker_englishname = $request->input('speaker_englishname');
           $speaker->speaker_company = $request->input('speaker_company');
           $speaker->speaker_title = $request->input('speaker_title');
-          $speaker->speaker_language = $request->input('speaker_language');
+          $speaker->average_1 = $request->input('average_1');
+          $speaker->average_2 = $request->input('average_2');
+          $speaker->average_3 = $request->input('average_3');
+          $speaker->average_4 = $request->input('average_4');
+          $speaker->average_5 = $request->input('average_5');
+          $average_array = [
+            $request->input('average_1'),
+            $request->input('average_2'),
+            $request->input('average_3'),
+            $request->input('average_4'),
+            $request->input('average_5'),
+          ];
+          $average = array_sum($average_array) / count($average_array);
+          $speaker->number_reviews = $average;
           $speaker->speaker_description = $request->input('speaker_description');
           $speaker->speaker_email = $request->input('speaker_email');
           $speaker->video = $request->input('speaker_video');
