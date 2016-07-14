@@ -44,6 +44,9 @@ class ReviewController extends Controller
           $review->user_id = $request->input('user_id');
 	        //$review->user_name = $request->input('user_name');
 	        //$review->user_email = $request->input('user_email');
+          $review->moderation_comment = 0;
+          $review->moderation_quote = 0;
+          $review->quote = $request->input('quote');
 	        $review->comment = $request->input('comment');
 	        $review->speaker_id = $request->input('speaker_id');
 	        $review->talk_id = '1';
@@ -61,28 +64,28 @@ class ReviewController extends Controller
 
     public function update(Request $request, $id)
     {
-        /*try{
-          $review = Review::find($id);
-          $review->review_name = $request->input('review_name');
-          $review->review_englishname = $request->input('review_englishname');
-          $review->review_company = $request->input('review_company');
-          $review->review_title = $request->input('review_title');
-          $review->review_language = $request->input('review_language');
-          $review->review_description = $request->input('review_description');
-          $review->review_email = $request->input('review_email');
-          $file = $request->file('image');
-          if($file != null){
-              $image_name = time()."-".$file->getClientOriginalName();
-              $file->move('uploads/reviews/', $image_name);
-              $review->review_photo = $image_name;
-              $review->local_path = 'uploads/reviews/'.$image_name;
-          }
+        try{
+          $review = Review::findOrFail($id);
+          $review_ratings = ReviewOption::all();
+          $score = $request->input('score');
+          if(count($score)<5) return $this->response->error('Score count is less than 5', 500);
+          $review->user_id = $request->input('user_id');
+          //$review->user_name = $request->input('user_name');
+          //$review->user_email = $request->input('user_email');
+          $review->quote = $request->input('quote');
+          $review->comment = $request->input('comment');
+          $review->speaker_id = $request->input('speaker_id');
+          $review->talk_id = '1';
           $review->save();
-          return $this->response->array($review->toArray());
+          $review->review_options()->detach();
+          for($i=1;$i<count($review_ratings);$i++){
+            $review->review_options()->attach($i,['score_id'=>$score[$i-1]]);
+          }
+            return $this->response->array($review->toArray());
         }
         catch(\Exception $e){
            // do task when error
            return $this->response->error($e->getMessage(), 500);
-        }*/
+        }
     }
 }
