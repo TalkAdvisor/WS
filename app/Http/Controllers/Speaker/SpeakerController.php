@@ -25,7 +25,7 @@ class SpeakerController extends Controller
 
     public function getMaxRating($count)
     {
-        $speakers = Speaker::orderBy('number_reviews', 'desc')->take($count)->get();
+        $speakers = Speaker::orderBy('average_1', 'desc')->take($count)->get();
         return $this->response->array(['speakers' => $speakers->toArray()]);
     }
 
