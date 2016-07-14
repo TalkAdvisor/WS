@@ -34,6 +34,19 @@ class ReviewController extends Controller
         return $this->response->array(['review' => $review->toArray(), 'review_rating' => $review_rating->toArray()]);
     }
 
+    public function getLastReview($count)
+    {
+        $reviews = Review::orderBy('id', 'desc')->take($count)->get();
+        $review_with_rating = array();
+        $review_data = array();
+        foreach($reviews as $review){
+          $review_with_rating['review'] = $review;
+          $review_with_rating['review_rating'] = $review->review_options()->get();
+          $review_data[] = $review_with_rating;
+        }
+        return $this->response->array(['reviews' => $review_data]);
+    }
+
     public function store(Request $request)
     {
         try{
