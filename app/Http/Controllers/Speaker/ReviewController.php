@@ -47,6 +47,15 @@ class ReviewController extends Controller
         return $this->response->array(['reviews' => $review_data]);
     }
 
+    public function getQuote($count)
+    {
+        $reviews = Review::orderByRaw('RAND()')->take($count)->get();
+        foreach($reviews as $review){
+          $quote[] = $review->quote;
+        }
+        return $this->response->array(['quotes' => $quote]);
+    }
+
     public function store(Request $request)
     {
         try{
