@@ -99,12 +99,17 @@ class SpeakerController extends Controller
 	        $speaker->speaker_email = $request->input('speaker_email');
           $speaker->video = $request->input('speaker_video');
 	        $file = $request->file('image');
-	        if($file != null){
-	            $image_name = time()."-".$file->getClientOriginalName();
-	            $file->move('uploads/speakers/', $image_name);
-	            $speaker->speaker_photo = $image_name;
-	            $speaker->local_path = 'uploads/speakers/'.$image_name;
-	        }
+          if($file != null){
+              //upload image to server and s3
+              $image_name = time()."-".$file->getClientOriginalName();
+              $file->move('uploads/speakers/', $image_name);
+              $speaker->local_path = 'uploads/speakers/'.$image_name;
+              $s3->put('speakers/'.$image_name, file_get_contents($speaker->local_path));
+              //delete old image
+              $s3->delete('speakers/'.$speaker->speaker_photo);
+              File::delete('uploads/speakers/'.$speaker->speaker_photo);
+              $speaker->speaker_photo = $image_name;
+          }
 	        $speaker->save();
           return $this->response->array($speaker->toArray());
         }

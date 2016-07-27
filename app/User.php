@@ -2,10 +2,13 @@
 
 namespace App;
 
+use Bican\Roles\Traits\HasRoleAndPermission;
+use Bican\Roles\Contracts\HasRoleAndPermission as HasRoleAndPermissionContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasRoleAndPermissionContract 
 {
+    use HasRoleAndPermission;
     /**
      * The attributes that are mass assignable.
      *
