@@ -19,7 +19,13 @@ class ReviewController extends Controller
         $review_with_rating = array();
         $review_data = array();
         foreach($reviews as $review){
-        	$review_with_rating['review'] = $review;
+          $review_with_relation = $review->toArray();
+          $review_with_relation['speaker'] = $review->speaker;
+          $review_with_relation['user'] = $review->user;
+          unset($review_with_relation['speaker_id']);
+          unset($review_with_relation['user_id']);
+          
+        	$review_with_rating['review'] = $review_with_relation;
 	        $review_with_rating['review_rating'] = $review->review_options()->get();
 	        $review_data[] = $review_with_rating;
 	    }
@@ -31,7 +37,12 @@ class ReviewController extends Controller
     {
         $review = Review::findOrFail($id);
         $review_rating = $review->review_options()->get();
-        return $this->response->array(['review' => $review->toArray(), 'review_rating' => $review_rating->toArray()]);
+        $review_data = $review->toArray();
+        $review_data['speaker'] = $review->speaker;
+        $review_data['user'] = $review->user;
+        unset($review_data['speaker_id']);
+        unset($review_data['user_id']);
+        return $this->response->array(['review' => $review_data, 'review_rating' => $review_rating->toArray()]);
     }
 
     public function getLastReview($count)
@@ -40,7 +51,13 @@ class ReviewController extends Controller
         $review_with_rating = array();
         $review_data = array();
         foreach($reviews as $review){
-          $review_with_rating['review'] = $review;
+          $review_with_relation = $review->toArray();
+          $review_with_relation['speaker'] = $review->speaker;
+          $review_with_relation['user'] = $review->user;
+          unset($review_with_relation['speaker_id']);
+          unset($review_with_relation['user_id']);
+
+          $review_with_rating['review'] = $review_with_relation;
           $review_with_rating['review_rating'] = $review->review_options()->get();
           $review_data[] = $review_with_rating;
         }
@@ -49,7 +66,7 @@ class ReviewController extends Controller
 
     public function getQuote($count)
     {
-        $reviews = Review::orderByRaw('RAND()')->take($count)->get();
+        $reviews = Review::whereNotNull('quote')->orderByRaw('RAND()')->take($count)->get();
         foreach($reviews as $review){
           $quote[] = $review->quote;
         }

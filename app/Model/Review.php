@@ -21,4 +21,9 @@ class Review extends Model
     {
         return $this->belongsTo('App\Model\Speaker');
     }
+
+     public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
 }

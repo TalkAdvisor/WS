@@ -42,7 +42,12 @@ class SpeakerController extends Controller
         $review_with_rating = array();
         $review_data = array();
         foreach($reviews as $review){
-          $review_with_rating['review'] = $review;
+          $review_with_relation = $review->toArray();
+          $review_with_relation['user'] = $review->user;
+          unset($review_with_relation['speaker_id']);
+          unset($review_with_relation['user_id']);
+
+          $review_with_rating['review'] = $review_with_relation;
           $review_with_rating['review_rating'] = $review->review_options()->get();
           $review_data[] = $review_with_rating;
         }
@@ -56,7 +61,12 @@ class SpeakerController extends Controller
         $review_with_rating = array();
         $review_data = array();
         foreach($reviews as $review){
-          $review_with_rating['review'] = $review;
+          $review_with_relation = $review->toArray();
+          $review_with_relation['user'] = $review->user;
+          unset($review_with_relation['speaker_id']);
+          unset($review_with_relation['user_id']);
+
+          $review_with_rating['review'] = $review_with_relation;
           $review_with_rating['review_rating'] = $review->review_options()->get();
           $review_data[] = $review_with_rating;
         }
@@ -66,7 +76,7 @@ class SpeakerController extends Controller
     public function getQuote($id, $count)
     {
         $speaker = Speaker::findOrFail($id);
-        $reviews = Review::where('speaker_id', '=', $speaker->id)->orderByRaw('RAND()')->take($count)->get();
+        $reviews = Review::where('speaker_id', '=', $speaker->id)->whereNotNull('quote')->orderByRaw('RAND()')->take($count)->get();
         foreach($reviews as $review){
           $quote[] = $review->quote;
         }
