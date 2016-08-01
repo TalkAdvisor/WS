@@ -66,7 +66,7 @@ class ReviewController extends Controller
 
     public function getQuote($count)
     {
-        $reviews = Review::whereNotNull('quote')->orderByRaw('RAND()')->take($count)->get();
+        $reviews = Review::whereNotNull('quote')->where('quote','<>','')->orderByRaw('RAND()')->take($count)->get();
         foreach($reviews as $review){
           $quote[] = $review->quote;
         }

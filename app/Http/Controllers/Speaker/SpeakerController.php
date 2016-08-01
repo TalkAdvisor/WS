@@ -76,7 +76,7 @@ class SpeakerController extends Controller
     public function getQuote($id, $count)
     {
         $speaker = Speaker::findOrFail($id);
-        $reviews = Review::where('speaker_id', '=', $speaker->id)->whereNotNull('quote')->orderByRaw('RAND()')->take($count)->get();
+        $reviews = Review::where('speaker_id', '=', $speaker->id)->whereNotNull('quote')->where('quote','<>','')->orderByRaw('RAND()')->take($count)->get();
         foreach($reviews as $review){
           $quote[] = $review->quote;
         }
