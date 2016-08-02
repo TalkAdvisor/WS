@@ -8,6 +8,7 @@ use Auth;
 use App\User;
 use App\Model\Review;
 use App\Http\Requests;
+use Bican\Roles\Models\Role;
 
 class UserController extends Controller
 {
@@ -75,7 +76,8 @@ class UserController extends Controller
 	            'email' => $email,
 	            'password' => bcrypt($password),
 	        ]);
-	        $user->attachRole(2); //2 -> user
+	        $userRole = Role::where('slug','=','user')->first();
+	        $user->attachRole($userRole->id);
 	        return $this->response->array(['user' => $user->toArray()]);
         }
         catch(\Exception $e){
