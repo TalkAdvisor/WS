@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Input;
 use Auth;
 use App\User;
+use App\Model\Review;
 use App\Http\Requests;
 
 class UserController extends Controller
@@ -34,6 +35,16 @@ class UserController extends Controller
 			return $this->response->array(['user' => $user->toArray()]);
 		}else{
 			return $this->response->array(['message'=>'The user is not exist']);
+		}
+    }
+
+    public function leaveReview($user_id, $speaker_id)
+    {
+    	$review = Review::where('user_id','=',$user_id)->where('speaker_id','=',$speaker_id)->get();
+    	if (count($review)) {
+		    return $this->response->array(['status'=>'false','message'=>'You have already leave the review for this speaker.']);
+		}else{
+			return $this->response->array(['status'=>'true','message'=>'You can add review for this speaker.']);
 		}
     }
 
