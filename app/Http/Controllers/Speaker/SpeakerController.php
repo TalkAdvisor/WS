@@ -86,6 +86,7 @@ class SpeakerController extends Controller
     public function store(Request $request)
     {
         try{
+          $s3 = Storage::disk('s3');
 	        $speaker = new Speaker;
 	        $speaker->speaker_name = $request->input('speaker_name');
 	        $speaker->speaker_englishname = $request->input('speaker_englishname');
@@ -105,7 +106,7 @@ class SpeakerController extends Controller
             $request->input('average_5'),
           ];
           $average = array_sum($average_array) / count($average_array);
-          $speaker->number_reviews = $average;
+          //$speaker->number_reviews = $average;
 	        $speaker->speaker_email = $request->input('speaker_email');
           $speaker->video = $request->input('speaker_video');
 	        $file = $request->file('image');
