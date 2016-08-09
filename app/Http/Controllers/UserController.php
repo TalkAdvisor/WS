@@ -73,13 +73,14 @@ class UserController extends Controller
             if($file != null){
               //upload image to server and s3
               $image_name = time()."-".$file->getClientOriginalName();
+              $old_img = $user->profile_picture;
               $user->profile_picture = $image_name;
               $file->move('uploads/users/', $image_name);
               $local_path = 'uploads/users/'.$image_name;
               $s3->put('users/'.$image_name, file_get_contents($local_path));
               //delete old image
-              $s3->delete('users/'.$user->profile_picture);
-              File::delete('uploads/users/'.$user->profile_picture);
+              $s3->delete('users/'.$old_img);
+              File::delete('uploads/users/'.$old_img);
             }
             $user->save();
             return $this->response->array(['user' => $user->toArray()]);
@@ -104,13 +105,13 @@ class UserController extends Controller
             if($file != null){
               //upload image to server and s3
               $image_name = time()."-".$file->getClientOriginalName();
+              $old_img = $user->profile_picture;
               $user->profile_picture = $image_name;
               $file->move('uploads/users/', $image_name);
               $local_path = 'uploads/users/'.$image_name;
               $s3->put('users/'.$image_name, file_get_contents($local_path));
               //delete old image
-              $s3->delete('users/'.$user->profile_picture);
-              File::delete('uploads/users/'.$user->profile_picture);
+              File::delete('uploads/users/'.$old_img);
             }
             $user->save();
 	        $userRole = Role::where('slug','=','user')->first();
@@ -130,16 +131,48 @@ class UserController extends Controller
         //$password = Input::get('password');
         $user = User::where('email','=',$email)->first();
 
-        if ($user && $user->hasRole('user')){
-            $user_facebook_id = $user->facebook_id;
-            if($user_facebook_id == $fb_id && $user_facebook_id != null){
-                return $this->response->array(['status'=>'1','message'=>'The account is existd in talkadvisor.','user' => $user->toArray()]);
+        if ($user){
+            if($user->hasRole('user')){
+                $user_facebook_id = $user->facebook_id;
+                if($user_facebook_id == $fb_id && $user_facebook_id != null){
+                    return $this->response->array(['status'=>'1','message'=>'The account is existd in talkadvisor.','user' => $user->toArray()]);
+                }else{
+                    return $this->response->array(['status'=>'2','message'=>'The account is existd in talkadvisor, but no facebook id.']);
+                } 
             }else{
-                return $this->response->array(['status'=>'2','message'=>'The account is existd in talkadvisor, but no facebook id.']);
-            }
+                return $this->response->array(['status'=>'3','message'=>'The account is existd in talkadvisor, but no user permission.']);
+            }       
         }
         else {
-            return $this->response->array(['status'=>'3','message'=>'No account in talkadvisor.']);
+            return $this->response->array(['status'=>'4','message'=>'No account in talkadvisor.']);
         }
     }
+
+    /*public function getStats($id){
+        $stats = [];
+        $reviewsCollection = Review::where('user_id',$id);
+        $reviews=$reviewsCollection->get();
+        
+        $stats['number_ratings']=$reviews->count();
+        $stats['number_comments']=$reviewsCollection->where('comment','!=',"")->count();
+        $stats['number_quotes']=$reviewsCollection->where('quote','!=',"")->count();
+        
+        for($i=0;$i<=5;$i++){                                       //initialisation of the averages
+            $stats["average_$i"]=0;
+        }
+        if($stats['number_ratings']!=0){
+            foreach($reviews as $review){                               //we sum over all the ratings                           
+                $ratings=RatingsController::getRatings($review->id);
+                foreach($ratings as $rating){
+                    $i = $rating->ratingoption_id;
+                    $stats["average_$i"]+=$rating->score;
+                }
+            }
+            for($i=0;$i<=5;$i++){                                       //we divide by the number of ratings
+                $stats["average_$i"]=$stats["average_$i"]/$stats['number_ratings'];
+            } 
+        }
+        
+        return $stats;
+    }*/
 }
