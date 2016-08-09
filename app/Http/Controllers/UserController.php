@@ -83,6 +83,10 @@ class UserController extends Controller
               File::delete('uploads/users/'.$old_img);
             }
             $user->save();
+            if(!$user->hasRole('user')){
+                $userRole = Role::where('slug','=','user')->first();
+                $user->attachRole($userRole->id);
+            }
             return $this->response->array(['user' => $user->toArray()]);
         }
         catch(\Exception $e){
