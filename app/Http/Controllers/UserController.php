@@ -154,7 +154,7 @@ class UserController extends Controller
             if($user_facebook_id == $fb_id && $user_facebook_id != null){
                 return $this->response->array(['status'=>'1','message'=>'The account is existd in talkadvisor.','user' => $user->toArray()]);
             }else{
-                return $this->response->array(['status'=>'2','message'=>'The account is existd in talkadvisor, but no facebook id.']);
+                return $this->response->array(['status'=>'2','message'=>'The account is existd in talkadvisor, but no facebook id.','user' => $user->toArray()]);
             }       
         }
         else {
