@@ -75,12 +75,21 @@ class SpeakerController extends Controller
 
     public function getQuote($id, $count)
     {
-        $speaker = Speaker::findOrFail($id);
-        $reviews = Review::where('speaker_id', '=', $speaker->id)->whereNotNull('quote')->where('quote','<>','')->orderByRaw('RAND()')->take($count)->get();
-        foreach($reviews as $review){
-          $quote[] = $review->quote;
-        }
-        return $this->response->array(['speaker' => $speaker->toArray(), 'quotes' => $quote]);
+        try{
+          $speaker = Speaker::findOrFail($id);
+          $reviews = Review::where('speaker_id', '=', $speaker->id)->whereNotNull('quote')->where('quote','<>','')->orderByRaw('RAND()')->take($count)->get();
+          if(count($reviews)>0){
+            foreach($reviews as $review){
+              $quote[] = $review->quote;
+            }
+            return $this->response->array(['speaker' => $speaker->toArray(), 'quotes' => $quote]);
+          }else{
+            return $this->response->array(['message' => 'No quotes from this speaker.']);
+          }
+        }catch(\Exception $e){
+          // do task when error
+          return $this->response->error($e->getMessage(), 500);
+        }  
     }
 
     public function store(Request $request)

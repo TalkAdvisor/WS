@@ -164,31 +164,50 @@ class UserController extends Controller
 
     public function getReview($id)
     {
-        $user = User::findOrFail($id);
-        $reviews = Review::where('user_id', '=', $user->id)->orderBy('id', 'desc')->get();
-        $review_with_rating = array();
-        $review_data = array();
-        foreach($reviews as $review){
-          $review_with_relation = $review->toArray();
-          $review_with_relation['speaker'] = $review->speaker;
-          unset($review_with_relation['speaker_id']);
-          unset($review_with_relation['user_id']);
+        try{
+            $user = User::findOrFail($id);
+            $reviews = Review::where('user_id', '=', $user->id)->orderBy('id', 'desc')->get();
+            if(count($reviews) > 0){
+                $review_with_rating = array();
+                $review_data = array();
+                foreach($reviews as $review){
+                  $review_with_relation = $review->toArray();
+                  $review_with_relation['speaker'] = $review->speaker;
+                  unset($review_with_relation['speaker_id']);
+                  unset($review_with_relation['user_id']);
 
-          $review_with_rating['review'] = $review_with_relation;
-          $review_with_rating['review_rating'] = $review->review_options()->get();
-          $review_data[] = $review_with_rating;
-        }
-        return $this->response->array(['user' => $user->toArray(), 'reviews' => $review_data]);
+                  $review_with_rating['review'] = $review_with_relation;
+                  $review_with_rating['review_rating'] = $review->review_options()->get();
+                  $review_data[] = $review_with_rating;
+                }
+                return $this->response->array(['user' => $user->toArray(), 'reviews' => $review_data]);
+            }else{
+                return $this->response->array(['message' => 'No reviews from this speaker.']);
+            }
+        }catch(\Exception $e){
+          // do task when error
+          return $this->response->error($e->getMessage(), 500);
+        } 
+        
     }
 
     public function getQuote($id)
     {
-        $user = User::findOrFail($id);
-        $reviews = Review::where('user_id', '=', $user->id)->whereNotNull('quote')->get();
-        foreach($reviews as $review){
-          $quote[] = $review->quote;
-          $speaker[] = $review->speaker;
-        }
-        return $this->response->array(['speaker' => $speaker, 'quotes' => $quote]);
+        try{
+            $user = User::findOrFail($id);
+            $reviews = Review::where('user_id', '=', $user->id)->whereNotNull('quote')->get();
+            if(count($reviews)>0){
+              foreach($reviews as $review){
+                $quote[] = $review->quote;
+                $speaker[] = $review->speaker;
+              }
+              return $this->response->array(['speaker' => $speaker->toArray(), 'quotes' => $quote]);
+            }else{
+              return $this->response->array(['message' => 'No quotes from this speaker.']);
+            }
+        }catch(\Exception $e){
+          // do task when error
+          return $this->response->error($e->getMessage(), 500);
+        } 
     }
 }
