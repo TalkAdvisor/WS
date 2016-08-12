@@ -7,6 +7,7 @@ use View;
 use Session;
 
 use Illuminate\Http\Request;
+use App\Model\Speaker;
 use App\Model\Review;
 use App\Model\ReviewOption;
 use App\Http\Controllers\Controller;
@@ -28,7 +29,7 @@ class ReviewController extends Controller
         	$review_with_rating['review'] = $review_with_relation;
 	        $review_with_rating['review_rating'] = $review->review_options()->get();
 	        $review_data[] = $review_with_rating;
-	    }
+	      }
         return $this->response->array(['reviews' => $review_data]);
 
     }
@@ -66,11 +67,23 @@ class ReviewController extends Controller
 
     public function getQuote($count)
     {
-        $reviews = Review::whereNotNull('quote')->where('quote','<>','')->orderByRaw('RAND()')->take($count)->get();
-        foreach($reviews as $review){
-          $quote[] = $review->quote;
-        }
-        return $this->response->array(['quotes' => $quote]);
+        try{
+          $reviews = Review::whereNotNull('quote')->where('quote','<>','')->orderByRaw('RAND()')->take($count)->get();
+          if(count($reviews)>0){
+            foreach($reviews as $review){
+              if($review->speaker_id){
+                 $speaker = Speaker::findOrFail($review->speaker_id);
+                 $quote[] = $review->quote;
+              }
+            }
+            return $this->response->array(['speaker' => $speaker, 'quotes' => $quote]);
+          }else{
+            return $this->response->array(['message' => 'No reviews.']);
+          }
+        }catch(\Exception $e){
+          // do task when error
+          return $this->response->error($e->getMessage(), 500);
+        } 
     }
 
     public function store(Request $request)

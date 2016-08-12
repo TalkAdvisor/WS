@@ -8,6 +8,7 @@ use Auth;
 use Storage;
 use File;
 use App\User;
+use App\Model\Speaker;
 use App\Model\Review;
 use App\Http\Requests;
 use Bican\Roles\Models\Role;
@@ -198,12 +199,14 @@ class UserController extends Controller
             $reviews = Review::where('user_id', '=', $user->id)->whereNotNull('quote')->get();
             if(count($reviews)>0){
               foreach($reviews as $review){
-                $quote[] = $review->quote;
-                $speaker[] = $review->speaker;
+                if($review->speaker_id){
+                   $quote[] = $review->quote;
+                   $speaker[] = Speaker::findOrFail($review->speaker_id); 
+                }                
               }
-              return $this->response->array(['speaker' => $speaker->toArray(), 'quotes' => $quote]);
+              return $this->response->array(['speaker' => $speaker, 'quotes' => $quote]);
             }else{
-              return $this->response->array(['message' => 'No quotes from this speaker.']);
+              return $this->response->array(['message' => 'No quotes from this User.']);
             }
         }catch(\Exception $e){
           // do task when error
