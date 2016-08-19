@@ -104,7 +104,7 @@ class ReviewController extends Controller
 	        $review->talk_id = '1';
 	        $review->save();
 	        for($i=1;$i<count($review_ratings);$i++){
-	        	$review->review_options()->attach($i,['score_id'=>$score[$i-1]]);
+	        	$review->review_options()->attach($i,['score'=>$score[$i-1]]);
 	        }
           	return $this->response->array($review->toArray());
         }
@@ -131,7 +131,7 @@ class ReviewController extends Controller
           $review->save();
           $review->review_options()->detach();
           for($i=1;$i<count($review_ratings);$i++){
-            $review->review_options()->attach($i,['score_id'=>$score[$i-1]]);
+            $review->review_options()->attach($i,['score'=>$score[$i-1]]);
           }
             return $this->response->array($review->toArray());
         }
