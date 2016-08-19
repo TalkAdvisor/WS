@@ -46,7 +46,7 @@ class UserController extends Controller
                     $ratings_count++;
                     for($count=0;$count < count($ratings); $count++){
                        $total[$count] = ((count($total) < 5) ? 0:$total[$count]);
-                       $total[$count] += $ratings[$count]->pivot->score_id; 
+                       $total[$count] += $ratings[$count]->pivot->score; 
                     }
                 }
             }
