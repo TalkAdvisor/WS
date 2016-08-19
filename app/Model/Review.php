@@ -9,7 +9,8 @@ class Review extends Model
     //
     public function review_options()
     {
-        return $this->belongsToMany('App\Model\ReviewOption')->withPivot('score_id')->withTimestamps();
+        return $this->belongsToMany('App\Model\ReviewOption', 'review_ratingoption', 
+      'review_id', 'review_option_id')->withPivot('score_id')->withTimestamps();
     }
 
     public function talk()
